@@ -1,0 +1,9 @@
+{
+    "dataFileName": "buse.txt",
+    "indexFileName": "data.ndx",
+    "recordLength": 401,
+    "keyEncoding": "UTF",
+    "keyStart": 13,
+    "keyEnd": 20,
+    "order":"ASC"
+}

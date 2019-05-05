@@ -1,27 +1,34 @@
 #include <string.h>
 #include <stdio.h>
+#include <json/json.h>
+
 int main ( int argc, char *argv[] )
-{   argv[1]=strcat(argv[1],".txt");
-    
+{   argv[1]=strcat(argv[1],".txt");/*adding .json extension to user's entered input file*/
+    int i;
     if ( argc != 2 ) /* argc should be 2 for ./a.out and filename.txt */
     {
-        printf( "usage: %s is provided,filename is not provided", argv[0] );
+        printf( "Please enter a json file" );
     }
     else 
     {
-        FILE *file = fopen(argv[1], "rb" );
-        if ( file == 0 )
+        FILE *file = fopen(argv[1], "rb" );/*read from user's entered json file*/
+        //the file reading process begins
+        if ( file != NULL )
         {
-            printf( "Could not open file\n" );
-        }
-        else 
-        {
-            int x;
-            while  ( ( x = fgetc( file ) ) != EOF )
-            {
-                printf( "%c", x );
+            char line[950]; /* line array */
+            
+            while ( fgets ( line, sizeof line, file ) != NULL ) /* read a line */
+            { 
+                //prints special part of the line
+                for(int i=2; i<5; i++){
+                    printf ("%c" ,line[i] ); 
+                }
             }
-            fclose( file );
+            fclose ( file );
+        }
+        else
+        {
+            perror ( argv[1] ); /* why didn't the file open? */ /*gives error message*/
         }
     }
 }

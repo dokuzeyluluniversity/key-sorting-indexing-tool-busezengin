@@ -1,0 +1,8 @@
+{
+    "editor.wordWrap": "on",
+    "code-runner.executorMap": {
+        
+        "c": "cd $dir && gcc $fileName -I/usr/include/libxml2 -lxml2 -ljson -std=c99 -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+        
+    }
+}

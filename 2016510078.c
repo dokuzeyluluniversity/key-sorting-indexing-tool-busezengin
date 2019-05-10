@@ -38,11 +38,70 @@ void printFile1()
 	}
 	fclose(inputFile);
 }
+int findRecord(char record[25]) {
+    // Open the file
+    FILE* inputFile;
+    inputFile = fopen(json_object_get_string(indexFileName), "rb");
 
+    // Calculate initial first and last indexes.
+    int firstIdx = 0;
+    fseek(inputFile, 100*sizeof(Index), SEEK_SET);
+    int lastIdx = (ftell(inputFile)/sizeof(Index))-1;
 
+    // Initiate the search.
+    int result = binaryFileSearch(inputFile, record, firstIdx, lastIdx);
+    fclose(inputFile);
+    return result;
+}
+int binaryFileSearch(FILE* fp, const char record[25], int firstIdx, int lastIdx){
+	printf("\nRunning Binary Search %d %d\n", firstIdx, lastIdx);
+	Index first, last, middle;
+	int returnData;
+	
+	// Calculate the middle Index
+	int middleIdx = (firstIdx+lastIdx)/2;
 
+	// Read first record and return if it is the searched one.
+	fseek(fp, firstIdx*(sizeof(Index)), SEEK_SET);
+	fread(&first, sizeof(Index), 1, fp);
+	if(strcmp(first.info,record) == 0)
+	{
+		returnData=first.index;
+		return returnData;
+	}
+	// Read last record and return if it is the searched one.
+	fseek(fp, lastIdx*sizeof(Index), SEEK_SET);
+	fread(&last, sizeof(Index), 1, fp);
+	if(strcmp(last.info,record) == 0)
+	{
+		returnData=last.index;
+		
+		return returnData;
+	}
+	// Recursion exit condition, If middle index is equal to first or last index
+	// required comparisons are already made, so record is not found.
+	// Create and return an empty person.
+	if(middleIdx==firstIdx || middleIdx == lastIdx) {
+		int d=-1;
+		return d;
+	}
 
-
+	// Read the middle record and return if it is the searched one.
+	fseek(fp, middleIdx*sizeof(Index), SEEK_SET);
+	fread(&middle, sizeof(Index), 1, fp);
+	if(strcmp(middle.info,record) == 0)
+	{
+		returnData=middle.index;
+		return returnData;
+	}
+	// Determine the record position and recursively call with appropriate attributes.
+	if(strcmp(middle.info,record)>0) {/* finds in which interval the information*/
+		return binaryFileSearch(fp, record, firstIdx+1, middleIdx-1);
+	} 
+	else {
+		return binaryFileSearch(fp, record, middleIdx+1, lastIdx-1);
+	}
+}
 int compareInformation(const void* a, const void* b){
     return (strcmp(((Index*)a)->info, ((Index*)b)->info));
 }
@@ -67,10 +126,9 @@ void createIndexFile(){
                    inf++;
                 }
                 indexes[indx].index=indx;
-                //printf("%d",indexes[2].index);
-                //printf("name is %s, index is %d \n", indexes.info, indexes.index);
+                
                 lineNumber++;
-                //printf("%d",indx);
+                
                 indx++;
             }
             qsort(indexes,100, sizeof(Index),compareInformation);
@@ -82,7 +140,7 @@ void createIndexFile(){
             fwrite(indexes,sizeof(Index),100,indexFile);
             fclose(indexFile);
             fclose ( file );
-             printf("Index file is created.");
+            printf("Index file is created.");
         }
         
         else
@@ -119,10 +177,7 @@ void jsonRead(char *argv[]){
             printf("keyEnd: %d\n", json_object_get_int(keyEnd));
             printf("order: %s\n", json_object_get_string(order));
             
-
-            //readFile();
-            //printFile1();
-            //createIndexFile(length,Index);
+            fclose(file);
             
         }
         
@@ -138,25 +193,46 @@ int main ( int argc, char *argv[] )
     
     if ( strcmp(argv[1] , "open" )==0) /* for open command */
     {
-        jsonRead(argv);
+        jsonRead(argv);//reads the json file and shows it
         
     
     }
     
     if(strcmp(argv[1] , "create_index" )==0){
-        createIndexFile();
-        printFile1();
+        
+        createIndexFile();//creates index file
+        printFile1();//prints the index file
        
     }
 
     if (strcmp(argv[1] , "search" )==0){
-        
+        	char record[22];
+            int which;
+            which=findRecord(record);
+			scanf("%s", record);
+            printf("Was the index found?");
+            printf(" %d",which);
+            FILE* file1;
+    	    file1 = fopen(json_object_get_string(indexFileName),"rb");
+            if(which >-1){
+				fseek(file1, which*sizeof(Index), SEEK_SET);
+				Index data;
+				fread(&data, sizeof(Index), 1,file1);
+				printf("\n---Person of interest--- \n information is: %s \n ", data.info);
+            }
+            else 
+				printf("Not found...");
     }
-    /*
+    
     if (strcmp(argv[1] , "close" )==0){
-        
-    }
-    */
-            
+        free(parsed_json);
+        free(dataFileName);
+        free(indexFileName);
+        free(recordLength);
+        free(keyEncoding);
+        free(keyStart);
+        free(keyEnd);
+        free(order);
+        printf("Files are closed and memory is freed.")/*Files closed in the functions*/,
+    }         
 }
-
